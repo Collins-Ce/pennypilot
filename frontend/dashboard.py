@@ -39,6 +39,18 @@ class DashboardFrame(tk.Frame):
             fg="white"
         ).pack(side="left", padx=20)
 
+        tk.Button(
+            header,
+            text="Reports",
+            command=self.app.show_reports,
+            bg="#7C3AED",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            bd=0,
+            padx=15,
+            pady=8,
+            cursor="hand2"
+        ).pack(side="right", padx=10)
         
         tk.Button(
             header,

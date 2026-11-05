@@ -72,3 +72,114 @@ def get_dashboard_data(user_id):
 
         if connection and connection.is_connected():
             connection.close()
+
+def get_monthly_summary(user_id, year, month):
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+            SELECT
+                COALESCE(SUM(
+                    CASE WHEN transaction_type = 'INCOME'
+                    THEN amount ELSE 0 END
+                ), 0) AS total_income,
+
+                COALESCE(SUM(
+                    CASE WHEN transaction_type = 'EXPENSE'
+                    THEN amount ELSE 0 END
+                ), 0) AS total_expenses
+
+            FROM transactions
+            WHERE user_id = %s
+              AND YEAR(transaction_date) = %s
+              AND MONTH(transaction_date) = %s
+        """
+
+        cursor.execute(query, (user_id, year, month))
+        result = cursor.fetchone()
+
+        result["balance"] = (
+            result["total_income"] - result["total_expenses"]
+        )
+
+        return result
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection and connection.is_connected():
+            connection.close()
+
+def get_expense_breakdown(user_id, year, month):
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+            SELECT
+                c.category_name,
+                SUM(t.amount) AS total
+            FROM transactions t
+            JOIN categories c
+                ON t.category_id = c.category_id
+            WHERE t.user_id = %s
+              AND t.transaction_type = 'EXPENSE'
+              AND YEAR(t.transaction_date) = %s
+              AND MONTH(t.transaction_date) = %s
+            GROUP BY c.category_id, c.category_name
+            ORDER BY total DESC
+        """
+
+        cursor.execute(query, (user_id, year, month))
+        return cursor.fetchall()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection and connection.is_connected():
+            connection.close()
+
+def get_monthly_trends(user_id, months=6):
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+            SELECT
+                DATE_FORMAT(transaction_date, '%Y-%m') AS month,
+                SUM(
+                    CASE WHEN transaction_type = 'INCOME'
+                    THEN amount ELSE 0 END
+                ) AS income,
+                SUM(
+                    CASE WHEN transaction_type = 'EXPENSE'
+                    THEN amount ELSE 0 END
+                ) AS expenses
+
+            FROM transactions
+            WHERE user_id = %s
+              AND transaction_date >=
+                  DATE_SUB(CURDATE(), INTERVAL %s MONTH)
+
+            GROUP BY DATE_FORMAT(transaction_date, '%Y-%m')
+            ORDER BY month
+        """
+
+        cursor.execute(query, (user_id, months))
+        return cursor.fetchall()
+
+    finally:
+        if cursor:
+            cursor.close()
+        if connection and connection.is_connected():
+            connection.close()

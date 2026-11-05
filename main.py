@@ -4,6 +4,7 @@ from frontend.login import LoginFrame
 from frontend.register import RegisterFrame
 from frontend.dashboard import DashboardFrame
 from frontend.transactions import TransactionsFrame
+from frontend.reports import ReportsFrame
 
 
 class PennyPilotApp:
@@ -34,6 +35,7 @@ class PennyPilotApp:
         self.current_frame = RegisterFrame(self.root, self)
         self.current_frame.pack(fill="both", expand=True)
 
+
     def show_dashboard(self):
         self.clear_screen()
         self.current_frame = DashboardFrame(self.root, self)
@@ -43,6 +45,13 @@ class PennyPilotApp:
     def show_transactions(self):
         self.clear_screen()
         self.current_frame = TransactionsFrame(self.root, self)
+        self.current_frame.pack(fill="both", expand=True)
+
+
+    
+    def show_reports(self):
+        self.clear_screen()
+        self.current_frame = ReportsFrame(self.root, self)
         self.current_frame.pack(fill="both", expand=True)
 
 
