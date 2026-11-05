@@ -3,6 +3,7 @@ import tkinter as tk
 from frontend.login import LoginFrame
 from frontend.register import RegisterFrame
 from frontend.dashboard import DashboardFrame
+from frontend.transactions import TransactionsFrame
 
 
 class PennyPilotApp:
@@ -37,6 +38,13 @@ class PennyPilotApp:
         self.clear_screen()
         self.current_frame = DashboardFrame(self.root, self)
         self.current_frame.pack(fill="both", expand=True)
+
+    
+    def show_transactions(self):
+        self.clear_screen()
+        self.current_frame = TransactionsFrame(self.root, self)
+        self.current_frame.pack(fill="both", expand=True)
+
 
     def logout(self):
         self.current_user = None

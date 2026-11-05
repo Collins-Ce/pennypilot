@@ -39,6 +39,21 @@ class DashboardFrame(tk.Frame):
             fg="white"
         ).pack(side="left", padx=20)
 
+        
+        tk.Button(
+            header,
+            text="Manage Transactions",
+            command=self.app.show_transactions,
+            bg="#16A34A",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            bd=0,
+            padx=15,
+            pady=8,
+            cursor="hand2"
+        ).pack(side="right", padx=10)
+
+
         tk.Button(
             header,
             text="Logout",
