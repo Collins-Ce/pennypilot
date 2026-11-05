@@ -1,0 +1,5 @@
+
+mysql-connector-python
+matplotlib
+bcrypt
+python-dotenv
