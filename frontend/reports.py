@@ -1,13 +1,11 @@
-from copy import error
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from datetime import date
-
-from tkinter import filedialog
-from backend.pdf_export import generate_monthly_pdf
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+from backend.pdf_export import generate_monthly_pdf
 
 from backend.analytics import (
     get_monthly_summary,
@@ -35,6 +33,7 @@ class ReportsFrame(tk.Frame):
         self.month_var = tk.StringVar(
             value=self.month_names[today.month - 1]
         )
+
         self.year_var = tk.StringVar(value=str(today.year))
 
         self.create_header()
@@ -44,7 +43,9 @@ class ReportsFrame(tk.Frame):
 
         self.load_reports()
 
+
     def create_header(self):
+
         header = tk.Frame(self, bg="#183153")
         header.pack(fill="x")
 
@@ -64,10 +65,13 @@ class ReportsFrame(tk.Frame):
             fg="white",
             bd=0,
             padx=15,
-            pady=8
+            pady=8,
+            cursor="hand2"
         ).pack(side="right", padx=25)
 
+
     def create_filters(self):
+
         frame = tk.Frame(self, bg="#F3F6FA")
         frame.pack(fill="x", padx=25, pady=15)
 
@@ -85,6 +89,7 @@ class ReportsFrame(tk.Frame):
             state="readonly",
             width=15
         )
+
         self.month_box.pack(side="left", padx=5)
 
         tk.Label(
@@ -94,8 +99,13 @@ class ReportsFrame(tk.Frame):
             font=("Arial", 11)
         ).pack(side="left", padx=(15, 5))
 
-        years = [str(year) for year in range(date.today().year - 10,
-                                             date.today().year + 2)]
+        years = [
+            str(year)
+            for year in range(
+                date.today().year - 10,
+                date.today().year + 2
+            )
+        ]
 
         self.year_box = ttk.Combobox(
             frame,
@@ -104,6 +114,7 @@ class ReportsFrame(tk.Frame):
             state="readonly",
             width=8
         )
+
         self.year_box.pack(side="left", padx=5)
 
         tk.Button(
@@ -114,7 +125,8 @@ class ReportsFrame(tk.Frame):
             fg="white",
             bd=0,
             padx=15,
-            pady=8
+            pady=8,
+            cursor="hand2"
         ).pack(side="left", padx=15)
 
         tk.Button(
@@ -129,23 +141,32 @@ class ReportsFrame(tk.Frame):
             cursor="hand2"
         ).pack(side="left", padx=5)
 
+
     def create_summary(self):
+
         frame = tk.Frame(self, bg="#F3F6FA")
         frame.pack(fill="x", padx=20, pady=5)
 
         self.income_label = self.create_summary_card(
-            frame, "Monthly Income", "#16A34A"
+            frame,
+            "Monthly Income",
+            "#16A34A"
         )
 
         self.expense_label = self.create_summary_card(
-            frame, "Monthly Expenses", "#DC2626"
+            frame,
+            "Monthly Expenses",
+            "#DC2626"
         )
 
         self.balance_label = self.create_summary_card(
-            frame, "Monthly Balance", "#183153"
+            frame,
+            "Monthly Balance",
+            "#183153"
         )
 
     def create_summary_card(self, parent, title, color):
+
         card = tk.Frame(
             parent,
             bg="white",
@@ -154,7 +175,13 @@ class ReportsFrame(tk.Frame):
             highlightbackground="#E2E8F0",
             highlightthickness=1
         )
-        card.pack(side="left", fill="both", expand=True, padx=7)
+
+        card.pack(
+            side="left",
+            fill="both",
+            expand=True,
+            padx=7
+        )
 
         tk.Label(
             card,
@@ -171,68 +198,133 @@ class ReportsFrame(tk.Frame):
             fg=color,
             font=("Arial", 18, "bold")
         )
+
         label.pack(anchor="w", pady=(8, 0))
 
         return label
 
+
     def create_charts(self):
-        self.charts_frame = tk.Frame(self, bg="#F3F6FA")
-        self.charts_frame.pack(
-            fill="both", expand=True, padx=20, pady=10
+
+        self.charts_frame = tk.Frame(
+            self,
+            bg="#F3F6FA"
         )
 
-        self.bar_figure = Figure(figsize=(4.5, 2.1), dpi=100)
+        self.charts_frame.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=10
+        )
+
+        # Income vs Expenses chart
+
+        self.bar_figure = Figure(
+            figsize=(5, 2.5),
+            dpi=100,
+            constrained_layout=True
+        )
+
         self.bar_axes = self.bar_figure.add_subplot(111)
 
-        self.pie_figure = Figure(figsize=(4.5, 2.1), dpi=100)
+        # Expense Breakdown chart
+
+        self.pie_figure = Figure(
+            figsize=(5.5, 2.5),
+            dpi=100,
+            constrained_layout=True
+        )
+
         self.pie_axes = self.pie_figure.add_subplot(111)
 
-        self.trend_figure = Figure(figsize=(9.5, 2.1), dpi=100)
+        # Monthly Trends chart
+
+        self.trend_figure = Figure(
+            figsize=(10, 2.8),
+            dpi=100,
+            constrained_layout=True
+        )
+
         self.trend_axes = self.trend_figure.add_subplot(111)
 
+        # Create canvases
+
         self.bar_canvas = FigureCanvasTkAgg(
-            self.bar_figure, master=self.charts_frame
+            self.bar_figure,
+            master=self.charts_frame
         )
 
         self.pie_canvas = FigureCanvasTkAgg(
-            self.pie_figure, master=self.charts_frame
+            self.pie_figure,
+            master=self.charts_frame
         )
 
         self.trend_canvas = FigureCanvasTkAgg(
-            self.trend_figure, master=self.charts_frame
+            self.trend_figure,
+            master=self.charts_frame
         )
 
+        # Place charts
+
         self.bar_canvas.get_tk_widget().grid(
-            row=0, column=0, padx=5, pady=5, sticky="nsew"
+            row=0,
+            column=0,
+            padx=5,
+            pady=5,
+            sticky="nsew"
         )
 
         self.pie_canvas.get_tk_widget().grid(
-            row=0, column=1, padx=5, pady=5, sticky="nsew"
+            row=0,
+            column=1,
+            padx=5,
+            pady=5,
+            sticky="nsew"
         )
 
         self.trend_canvas.get_tk_widget().grid(
-            row=1, column=0, columnspan=2,
-            padx=5, pady=5, sticky="nsew"
+            row=1,
+            column=0,
+            columnspan=2,
+            padx=5,
+            pady=10,
+            sticky="nsew"
         )
 
         self.charts_frame.grid_columnconfigure(0, weight=1)
         self.charts_frame.grid_columnconfigure(1, weight=1)
+
+        self.charts_frame.grid_rowconfigure(0, weight=1)
         self.charts_frame.grid_rowconfigure(1, weight=1)
 
+
     def load_reports(self):
+
         try:
-            month = self.month_names.index(self.month_var.get()) + 1
+
+            month = self.month_names.index(
+                self.month_var.get()
+            ) + 1
+
             year = int(self.year_var.get())
 
             summary = get_monthly_summary(
-                self.user_id, year, month
+                self.user_id,
+                year,
+                month
             )
 
             expenses = get_expense_breakdown(
-                self.user_id, year, month
+                self.user_id,
+                year,
+                month
             )
 
-            trends = get_monthly_trends(self.user_id, 6)
+            trends = get_monthly_trends(
+                self.user_id,
+                6
+            )
 
             income = summary["total_income"]
             expense = summary["total_expenses"]
@@ -241,9 +333,11 @@ class ReportsFrame(tk.Frame):
             self.income_label.config(
                 text=f"₹{income:,.2f}"
             )
+
             self.expense_label.config(
                 text=f"₹{expense:,.2f}"
             )
+
             self.balance_label.config(
                 text=f"₹{balance:,.2f}"
             )
@@ -253,95 +347,218 @@ class ReportsFrame(tk.Frame):
             self.draw_trend_chart(trends)
 
         except Exception as error:
+
             messagebox.showerror(
                 "Report Error",
                 f"Could not generate report:\n{error}"
             )
 
+
     def draw_bar_chart(self, income, expenses):
+
         self.bar_axes.clear()
 
         self.bar_axes.bar(
             ["Income", "Expenses"],
             [float(income), float(expenses)],
-            color=["#16A34A", "#DC2626"]
+            color=["#16A34A", "#DC2626"],
+            width=0.7
         )
 
-        self.bar_axes.set_title("Income vs Expenses")
+        self.bar_axes.set_title(
+            "Income vs Expenses",
+            fontsize=13,
+            fontweight="bold"
+        )
+
         self.bar_axes.set_ylabel("Amount (₹)")
-        self.bar_figure.tight_layout()
+
+        self.bar_axes.grid(
+            axis="y",
+            alpha=0.2
+        )
+
         self.bar_canvas.draw()
 
+
     def draw_pie_chart(self, expenses):
+
         self.pie_axes.clear()
 
         if expenses:
+
             labels = [
-                item["category_name"] for item in expenses
+                item["category_name"]
+                for item in expenses
             ]
 
             values = [
-                float(item["total"]) for item in expenses
+                float(item["total"])
+                for item in expenses
             ]
 
-            self.pie_axes.pie(
+            wedges, texts, autotexts = self.pie_axes.pie(
                 values,
-                labels=labels,
+                labels=None,
                 autopct="%1.1f%%",
-                startangle=90
+                startangle=90,
+                pctdistance=0.75,
+                wedgeprops={
+                    "width": 0.45,
+                    "edgecolor": "white",
+                    "linewidth": 1.5
+                },
+                textprops={
+                    "fontsize": 8,
+                    "fontweight": "bold"
+                }
             )
-            self.pie_axes.set_title("Expense Breakdown")
+
+            # Category names in a separate legend
+
+            self.pie_axes.legend(
+                wedges,
+                labels,
+                title="Categories",
+                loc="center left",
+                bbox_to_anchor=(1.0, 0.5),
+                fontsize=8,
+                title_fontsize=9
+            )
+
+            self.pie_axes.set_title(
+                "Expense Breakdown",
+                fontsize=13,
+                fontweight="bold"
+            )
+
+            self.pie_axes.set_aspect("equal")
+
         else:
+
             self.pie_axes.text(
-                0.5, 0.5,
+                0.5,
+                0.5,
                 "No expenses recorded",
                 ha="center",
-                va="center"
+                va="center",
+                fontsize=11
             )
-            self.pie_axes.set_title("Expense Breakdown")
 
-        self.pie_figure.tight_layout()
+            self.pie_axes.set_title(
+                "Expense Breakdown",
+                fontsize=13,
+                fontweight="bold"
+            )
+
         self.pie_canvas.draw()
 
+
     def draw_trend_chart(self, trends):
+
         self.trend_axes.clear()
 
         if trends:
-            months = [item["month"] for item in trends]
 
-            income = [
-                float(item["income"]) for item in trends
-            ]
+            months = []
+            income = []
+            expenses = []
 
-            expenses = [
-                float(item["expenses"]) for item in trends
-            ]
+            for item in trends:
+
+                month_value = str(item["month"])
+
+                try:
+
+                    month_number = int(
+                        month_value.split("-")[-1]
+                    )
+
+                    month_label = date(
+                        2000,
+                        month_number,
+                        1
+                    ).strftime("%b")
+
+                except (ValueError, TypeError):
+
+                    month_label = month_value
+
+                months.append(month_label)
+
+                income.append(
+                    float(item["income"])
+                )
+
+                expenses.append(
+                    float(item["expenses"])
+                )
+
+            positions = list(range(len(months)))
 
             self.trend_axes.plot(
-                months, income,
-                marker="o", label="Income"
+                positions,
+                income,
+                marker="o",
+                linewidth=2,
+                markersize=7,
+                label="Income"
             )
 
             self.trend_axes.plot(
-                months, expenses,
-                marker="o", label="Expenses"
+                positions,
+                expenses,
+                marker="o",
+                linewidth=2,
+                markersize=7,
+                label="Expenses"
             )
 
-            self.trend_axes.legend()
-            self.trend_axes.tick_params(
-                axis="x", rotation=30
+            self.trend_axes.set_xticks(positions)
+
+            self.trend_axes.set_xticklabels(
+                months,
+                rotation=0
             )
+
+            self.trend_axes.legend(
+                loc="best"
+            )
+
+            self.trend_axes.set_ylim(bottom=0)
+
+            self.trend_axes.grid(
+                axis="y",
+                alpha=0.2
+            )
+
         else:
+
             self.trend_axes.text(
-                0.5, 0.5,
+                0.5,
+                0.5,
                 "No transaction history available",
                 ha="center",
                 va="center"
             )
 
+        self.trend_axes.set_title(
+            "Monthly Income & Expense Trends",
+            fontsize=13,
+            fontweight="bold"
+        )
+
+        self.trend_axes.set_ylabel(
+            "Amount (₹)"
+        )
+
+        self.trend_canvas.draw()
+
 
     def export_pdf(self):
+
         try:
+
             month = self.month_names.index(
                 self.month_var.get()
             ) + 1
@@ -350,8 +567,12 @@ class ReportsFrame(tk.Frame):
 
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".pdf",
-                filetypes=[("PDF Files", "*.pdf")],
-                initialfile=f"PennyPilot_Report_{year}_{month:02d}.pdf"
+                filetypes=[
+                    ("PDF Files", "*.pdf")
+                ],
+                initialfile=(
+                    f"PennyPilot_Report_{year}_{month:02d}.pdf"
+                )
             )
 
             if not file_path:
@@ -371,12 +592,8 @@ class ReportsFrame(tk.Frame):
             )
 
         except Exception as error:
+
             messagebox.showerror(
                 "PDF Export Failed",
                 f"Could not generate PDF:\n{error}"
             )
-
-        self.trend_axes.set_title("Monthly Income & Expense Trends")
-        self.trend_axes.set_ylabel("Amount (₹)")
-        self.trend_figure.tight_layout()
-        self.trend_canvas.draw()
