@@ -1,3 +1,4 @@
+import csv
 from database.connection import get_connection
 
 
@@ -224,5 +225,68 @@ def delete_transaction(transaction_id, user_id):
     finally:
         if cursor:
             cursor.close()
+        if connection and connection.is_connected():
+            connection.close()
+
+
+def export_transactions_to_csv(user_id, file_path):
+    connection = None
+    cursor = None
+
+    try:
+        connection = get_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        query = """
+            SELECT
+                t.transaction_id,
+                t.transaction_date,
+                t.transaction_type,
+                c.category_name,
+                t.amount,
+                t.description
+            FROM transactions t
+            JOIN categories c
+                ON t.category_id = c.category_id
+            WHERE t.user_id = %s
+            ORDER BY t.transaction_date DESC,
+                     t.transaction_id DESC
+        """
+
+        cursor.execute(query, (user_id,))
+        transactions = cursor.fetchall()
+
+        columns = [
+            "Transaction ID",
+            "Date",
+            "Type",
+            "Category",
+            "Amount",
+            "Description"
+        ]
+
+        with open(file_path, "w", newline="", encoding="utf-8-sig") as file:
+            writer = csv.writer(file)
+            writer.writerow(columns)
+
+            for transaction in transactions:
+                writer.writerow([
+                    transaction["transaction_id"],
+                    transaction["transaction_date"],
+                    transaction["transaction_type"],
+                    transaction["category_name"],
+                    transaction["amount"],
+                    transaction["description"]
+                ])
+
+        return True, len(transactions)
+
+    except Exception:
+        raise
+
+    finally:
+        if cursor:
+            cursor.close()
+
         if connection and connection.is_connected():
             connection.close()

@@ -1,6 +1,10 @@
+from copy import error
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date
+
+from tkinter import filedialog
+from backend.pdf_export import generate_monthly_pdf
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -112,6 +116,18 @@ class ReportsFrame(tk.Frame):
             padx=15,
             pady=8
         ).pack(side="left", padx=15)
+
+        tk.Button(
+            frame,
+            text="Download PDF",
+            command=self.export_pdf,
+            bg="#16A34A",
+            fg="white",
+            bd=0,
+            padx=15,
+            pady=8,
+            cursor="hand2"
+        ).pack(side="left", padx=5)
 
     def create_summary(self):
         frame = tk.Frame(self, bg="#F3F6FA")
@@ -321,6 +337,43 @@ class ReportsFrame(tk.Frame):
                 "No transaction history available",
                 ha="center",
                 va="center"
+            )
+
+
+    def export_pdf(self):
+        try:
+            month = self.month_names.index(
+                self.month_var.get()
+            ) + 1
+
+            year = int(self.year_var.get())
+
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".pdf",
+                filetypes=[("PDF Files", "*.pdf")],
+                initialfile=f"PennyPilot_Report_{year}_{month:02d}.pdf"
+            )
+
+            if not file_path:
+                return
+
+            generate_monthly_pdf(
+                self.user_id,
+                year,
+                month,
+                file_path
+            )
+
+            messagebox.showinfo(
+                "Export Successful",
+                f"Financial report downloaded successfully!\n\n"
+                f"Saved to:\n{file_path}"
+            )
+
+        except Exception as error:
+            messagebox.showerror(
+                "PDF Export Failed",
+                f"Could not generate PDF:\n{error}"
             )
 
         self.trend_axes.set_title("Monthly Income & Expense Trends")
