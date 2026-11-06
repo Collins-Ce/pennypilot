@@ -1,13 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import date, datetime
+from tkinter import filedialog
 
 from backend.transaction import (
     get_categories,
     get_transactions,
     add_transaction,
     update_transaction,
-    delete_transaction
+    delete_transaction,
+    export_transactions_to_csv
 )
 
 
@@ -93,6 +95,19 @@ class TransactionsFrame(tk.Frame):
             bd=0,
             padx=15,
             pady=10
+        ).pack(side="left", padx=5)
+
+        tk.Button(
+            controls,
+            text="Export CSV",
+            command=self.export_csv,
+            bg="#16A34A",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            bd=0,
+            padx=15,
+            pady=10,
+            cursor="hand2"
         ).pack(side="left", padx=5)
 
         table_frame = tk.Frame(self, bg="#F3F6FA")
@@ -393,4 +408,34 @@ class TransactionsFrame(tk.Frame):
         except Exception as error:
             messagebox.showerror(
                 "Database Error", str(error)
+            )
+
+    def export_csv(self):
+        user_id = self.app.current_user["user_id"]
+
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV Files", "*.csv")],
+            initialfile="PennyPilot_Transactions.csv"
+        )
+
+        if not file_path:
+            return
+
+        try:
+            success, count = export_transactions_to_csv(
+                user_id, file_path
+            )
+
+            if success:
+                messagebox.showinfo(
+                    "Export Successful",
+                    f"{count} transactions exported successfully!\n\n"
+                    f"Saved to:\n{file_path}"
+                )
+
+        except Exception as e:
+            messagebox.showerror(
+                "Export Failed",
+                f"Could not export transactions:\n{e}"
             )
